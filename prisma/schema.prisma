@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Empresa {
+  id            Int           @id @default(autoincrement())
+  nome          String
+  colaboradores Colaborador[]
+  gestores      Gestor[]
+  planos        Plano[]
+  users         User[]
+  token         String        @unique @default(uuid())
+}
+
+model Plano {
+  id        Int     @id @default(autoincrement())
+  tipo      String
+  empresa   Empresa @relation(fields: [empresaId], references: [id])
+  empresaId Int
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  nome        String
+  cargo       String
+  empresaId   Int
+  empresa     Empresa       @relation(fields: [empresaId], references: [id])
+  colaborador Colaborador[]
+  gestor      Gestor[]
+}
+
+model Colaborador {
+  id             Int             @id @default(autoincrement())
+  horaMensal     Int
+  userId         Int
+  user           User            @relation(fields: [userId], references: [id])
+  empresaId      Int
+  empresa        Empresa         @relation(fields: [empresaId], references: [id])
+  registrosPonto RegistroPonto[]
+}
+
+model Gestor {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  empresaId Int
+  empresa   Empresa @relation(fields: [empresaId], references: [id])
+  setor     Setor[]
+}
+
+model Setor {
+  id       Int    @id @default(autoincrement())
+  nome     String
+  gestorId Int
+  gestor   Gestor @relation(fields: [gestorId], references: [id])
+}
+
+model RegistroPonto {
+  id            Int         @id @default(autoincrement())
+  dataHora      DateTime
+  colaboradorId Int
+  colaborador   Colaborador @relation(fields: [colaboradorId], references: [id])
+}
